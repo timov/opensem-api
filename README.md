@@ -9,5 +9,9 @@ The endpoints:
 
 1. DbPedia(/api/dbpedia)
 2. CoreNLP(/api/corenlp)
+You need to have CoreNLP running locally in order for this to work. The simplest and fastes way is using docker:
+ ```
+  docker run -p 9000:9000 --name coreNLP --rm -i -t motiz88/corenlp
+  ```
 3. Sentiment(/api/sentiment)
 4. WordNet(/api/wordnet)
