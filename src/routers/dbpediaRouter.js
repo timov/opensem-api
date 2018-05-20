@@ -1,18 +1,16 @@
 var express = require('express');
-var mlspotlight = require('dbpedia-spotlight');
+var dbpedia = require('../services/dbpedia');
 
 var routes = function () {
     var router = express.Router();
 
-    // fix dbpedia-spotlight to english language
-    mlspotlight.fixToEndpoint('english');
-
     router.route('/')
         .post(function (req, res) {
             var text = req.body.text;
-            mlspotlight.annotate(text, function (output) {
-                res.send(output);
-            });
+            if (!text) {
+                res.send("Missing text parameter.");
+            }
+            dbpedia(text).then(output => res.send(output));
         })
         .get(function (req, res) {
             res.send("Please use POST request.");
