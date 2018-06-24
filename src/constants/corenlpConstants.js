@@ -1,0 +1,25 @@
+module.exports = {
+    posTags: [
+        "CD",
+        "FW",
+        "JJ",
+        "JJR",
+        "JJS",
+        "NN",
+        "NNS",
+        "NNP",
+        "NNPS",
+        "RBR",
+        "RBS",
+        "RP",
+        "SYM",
+        "UH",
+        "VB",
+        "VBD",
+        "VBG",
+        "VBN",
+        "VBP",
+        "VBZ",
+    ],
+    annotators: 'tokenize,lemma,ssplit,pos,ner,regexner,parse,sentiment'
+}

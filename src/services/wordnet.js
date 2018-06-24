@@ -1,64 +1,62 @@
 var wordnet = require('wordnet');
+var WordPOS = require('wordpos'),
+    wordpos = new WordPOS();
+var groupArray = require('group-array');
+var _ = require('underscore');
+var Constants = require('../constants/wordnetConstants');
 
-var pointerTypes = {
-    '!': 'Antonym',
-    '@': 'Hypernym',
-    '@i': 'Instance Hypernym',
-    '~': 'Hyponym',
-    '~i': 'Instance Hyponym',
-    '#m': 'Member holonym',
-    '#s': 'Substance holonym',
-    '#p': 'Part holonym',
-    '%m': 'Member meronym',
-    '%s': 'Substance meronym',
-    '%p': 'Part meronym',
-    '=': 'Attribute',
-    '+': 'Derivationally related form',
-    ';c': 'Domain of synset - TOPIC',
-    '-c': 'Member of this domain - TOPIC',
-    ';r': 'Domain of synset - REGION',
-    '-r': 'Member of this domain - REGION',
-    ';u': 'Domain of synset - USAGE',
-    '-u': 'Member of this domain - USAGE',
-    '^': 'Also see'
-};
+function isRelevant(word) {
+    return Constants.posTags.indexOf(word.pos) > -1;
+}
 
-module.exports = async function (text) {
-    var words = text.toLowerCase().split(' ');
-    var result = [];
+module.exports = async function (words) {
+    let promises = words.filter(word => isRelevant(word)).map(async (word) => {
 
-    return await new Promise((resolve, reject) => {
-        words.forEach(function (word) {
-            word = word.replace(/[^0-9a-z]/gi, '');
-            wordnet.lookup(word, function (err, definitions) {
-                if (definitions) {
-                    var pointers = [];
-                    definitions[0].meta.pointers.forEach(function (pointer) {
+        let lemma = word.lemma;
+        let pos = word.pos;
+
+        let lookupResponse = await wordpos.lookup(lemma);
+
+        if (pos.startsWith('VB')) {
+            lookupResponse = await wordpos.lookupVerb(lemma);
+        } else if (pos.startsWith('RB')) {
+            lookupResponse = await wordpos.lookupAdverb(lemma);
+        } else if (pos.startsWith('NN') || pos.startsWith('PR')) {
+            lookupResponse = await wordpos.lookupNoun(lemma);
+        } else if (pos.startsWith('JJ')) {
+            lookupResponse = await wordpos.lookupAdjective(lemma);
+        }
+
+        lookupResponse = _.first(lookupResponse, 3);
+
+        let response = await Promise.all(lookupResponse.map(async res => {
+            let pointers = [];
+            if (res.ptrs.length > 0) {
+                await Promise.all(res.ptrs.map(async pointer => {
+                    let seekResponse = await wordpos.seek(pointer.synsetOffset, pointer.pos);
+                    if (pointer.pointerSymbol != '~')
                         pointers.push({
-                            "pointerSymbol": pointer.pointerSymbol,
-                            "words": pointer.data.meta.words,
-                            "glossary": pointer.data.glossary,
-                            "pointerType": pointerTypes[pointer.pointerSymbol]
+                            "pointerType": Constants.pointerTypes[pointer.pointerSymbol],
+                            "words": seekResponse.synonyms,
+                            "glossary": seekResponse.gloss,
                         });
-                    });
+                }));
+            }
+            return {
+                "synsetType": res.synsetType,
+                "synonyms": res.synonyms,
+                "glossary": res.gloss,
+                "pointers": groupArray(pointers, 'pointerType')
+            };
+        }));
 
-                    var wres = {
-                        "word": word,
-                        "synsetType": definitions[0].meta.synsetType,
-                        "words": definitions[0].meta.words,
-                        "glossary": definitions[0].glossary,
-                        "pointers": pointers
-                    };
+        let synsets = await Promise.all(response);
+        return {
+            "word": lemma,
+            "synsets": synsets
+        }
+    });
 
-                    result.push(wres);
-                }
-                else {
-                    result.push({ "word": word, "result": err.message });
-                }
-                if (result.length === words.length) {
-                    resolve(result);
-                }
-            });
-        });
-    })
+    let result = await Promise.all(promises);
+    return result;
 };

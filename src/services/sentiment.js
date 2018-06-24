@@ -1,14 +1,9 @@
 var sentiment = require('sentiment');
+var _ = require('underscore');
 
 module.exports = function (text) {
   var result = sentiment(text);
-
-  if (result.score > 0)
-    result.sentiment = "Positive";
-  else if (result.score < 0)
-    result.sentiment = "Negative";
-  else
-    result.sentiment = "Neutral";
+  result = _.pick(result, 'positive', 'negative'); 
 
   return result;
 };
