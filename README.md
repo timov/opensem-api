@@ -48,4 +48,4 @@ You need to have CoreNLP running locally in order for this to work. The simplest
 - CoreNLP
   - licence: [CoreNLP licence](https://stanfordnlp.github.io/CoreNLP/#license)
 - WordNet
- -  licence: [WordNet 3.0](https://wordnet.princeton.edu/license-and-commercial-use)
+  - licence: [WordNet 3.0](https://wordnet.princeton.edu/license-and-commercial-use)
