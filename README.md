@@ -1,20 +1,22 @@
 # opensem-api
 API for the Opensem project
 
-This API consists of a couple of endpoints.
+This API consists of a couple of endpoints that run different text analysis.
 The POST requests should have a "text" parameter in the body representing the text we want to analyse.
 The API runs on port 8080 on your localhost. This can be changed in the gulpfile.
 
 ## The endpoints:
 
-1. DbPedia(/api/dbpedia)
-2. CoreNLP(/api/corenlp)
+1. Opensem(/api/opensem)
+- This is the main endpoint which does all analisys in one.
+2. DbPedia(/api/dbpedia)
+3. CoreNLP(/api/corenlp)
 You need to have CoreNLP running locally in order for this to work. The simplest and fastest way is using docker:
  ```
   docker run -p 9000:9000 --name coreNLP --rm -i -t motiz88/corenlp
   ```
-3. Sentiment(/api/sentiment)
-4. WordNet(/api/wordnet)
+4. Sentiment(/api/sentiment)
+5. WordNet(/api/wordnet)
 
 ## Used npm libraries:
 
