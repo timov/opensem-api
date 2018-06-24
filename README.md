@@ -1,7 +1,7 @@
 # opensem-api
 API for the Opensem project
 
-This API consists of a couple of endpoints that can recieve requests.
+This API consists of a couple of endpoints.
 The POST requests should have a "text" parameter in the body representing the text we want to analyse.
 The API runs on port 8080 on your localhost. This can be changed in the gulpfile.
 
